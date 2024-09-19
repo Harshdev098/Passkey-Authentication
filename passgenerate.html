@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>passkey</title>
+</head>
+<body>
+    <button>Enable passkey Authentication</button>
+    <div id="result">
+
+    </div>
+    <script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+    <script>
+        const { startRegistration } = SimpleWebAuthnBrowser;
+        const btn=document.getElementsByTagName('button')[0]
+        btn.addEventListener('click',async(e)=>{
+            e.preventDefault()
+            const queryString = window.location.search;
+            const urlParams=new URLSearchParams(queryString)
+            console.log(urlParams)
+            const userid=urlParams.get('userid')
+            console.log(userid)
+            const response=await fetch(`http://localhost:3000/challenge/make?userid=${userid}`,{
+                method:'GET',
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            })
+            if(response.status=200){
+                console.log(response)
+                const result= await response.json()
+                const options=result.options
+                console.log("options: ",options)
+                const authenticationResult=await startRegistration(options)
+                console.log("authentication result",authenticationResult)
+                const response2=await fetch(`http://localhost:3000/challenge/accepted?userid=${userid}`,{
+                    method:'POST',
+                    headers:{
+                        'Content-Type':'application/json'
+                    },
+                    body:JSON.stringify({credential:authenticationResult})
+                })
+                if(response2.ok){
+                    console.log(response2)
+                    console.log("verified")
+                    const reuslt2=await response2.json()
+                    const para=document.createElement('p')
+                    para.textContent="Verified"
+                    const result=document.getElementById('result')
+                    result.append(para)
+                }
+            }
+        })
+    </script>
+</body>
+</html>

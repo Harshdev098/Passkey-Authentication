@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>register</title>
+</head>
+
+<body>
+    <form>
+        <input id="name" type="name" placeholder="enter the name">
+        <input id="pass" type="password" placeholder="enter the password">
+        <button type="submit">Signup</button>
+    </form>
+
+    <script>
+        const btn = document.getElementsByTagName('button')[0]
+        btn.addEventListener('click', async(e) => {
+            e.preventDefault()
+            console.log("btn triggered")
+            const name=document.getElementById('name')
+            const pass=document.getElementById('pass')
+            console.log(name.value,pass.value)
+            const response=await fetch('http://localhost:3000/register',{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify({name:name.value,password:pass.value})
+            })
+            if(response.ok){
+                console.log(response)
+                const result=await response.json()
+                const userid=result.id
+                window.location.href=`/passgenerate?userid=${userid}`
+            }
+            else{
+                console.log("an error occured")
+            }
+        })
+    </script>
+</body>
+
+</html>
